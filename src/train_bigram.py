@@ -56,14 +56,14 @@ def multinomial_sampling(probs, num_samples):
 
 # bigram model
 class Bigram(nn.Module):
-    def __init__(self, vocab_size):
+    def __init__(self):
         super().__init__()
         # What is accomplished using nn.Embedding?
         # It creates a lookup table for the tokens in the vocabulary.
         # The table has vocab_size rows and vocab_size columns.
         # The row index is the token id and the column index is the embedding dimension.
         # The value at position (i, j) is the j-th embedding of the i-th token.
-        self.token_embedding_table = nn.Embedding(vocab_size, vocab_size)
+        self.token_embedding_table = nn.Embedding(vocab_size, embedding_dim)
 
     def __call__(self, idx, target=None):
         logits = self.token_embedding_table(idx)
@@ -109,7 +109,7 @@ def estimated_loss(model):
     return out
 
 
-m = Bigram(vocab_size=tokenizer.vocab_size)
+m = Bigram()
 
 # initialize the generation
 init_tokens = mx.zeros((1, 1), dtype=mx.int32)

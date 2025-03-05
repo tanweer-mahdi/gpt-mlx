@@ -5,7 +5,7 @@
     },
     "model": {
         "context_window": 8,
-        "embedding_dim": 8,
+        "embedding_dim": 65,
         "batch_size": 32
     },
     "training": {
