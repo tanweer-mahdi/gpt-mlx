@@ -4,18 +4,26 @@ import mlx.nn as nn
 import mlx.nn.losses as losses
 import mlx.optimizers as optimizers
 import numpy as np
+import json
 
-with open("datasets/tiny_shakespeare.txt", "r") as f:
+# Load config
+with open("train_config.json", "r") as f:
+    config = json.load(f)
+
+# Load and prepare data
+with open(config["data"]["dataset_path"], "r") as f:
     text = f.read()
 
-# all the hyperparameters
+# Extract hyperparameters from config
 data_size = len(text)
-train_size = int(0.8 * data_size)
-context_window = 8
-batch_size = 32
-n_eval_steps = 200
-n_train_steps = 10000
-eval_interval = 500
+train_size = int(config["data"]["train_split"] * data_size)
+context_window = config["model"]["context_window"]
+batch_size = config["model"]["batch_size"]
+n_eval_steps = config["training"]["n_eval_steps"]
+n_train_steps = config["training"]["n_train_steps"]
+eval_interval = config["training"]["eval_interval"]
+learning_rate = config["training"]["learning_rate"]
+max_new_tokens = config["generation"]["max_new_tokens"]
 
 tokenizer = CharTokenizer(text)
 
@@ -28,7 +36,7 @@ def get_batch(split):
     data = train_data if split == "train" else val_data
     # get random starting indices for each batch
     starting_indices_batch = mx.random.randint(
-        0, len(train_data) - context_window, (batch_size,)
+        0, len(data) - context_window, (batch_size,)
     )
     starting_indices_batch = [int(i) for i in starting_indices_batch]
     x = mx.stack([data[i : i + context_window] for i in starting_indices_batch])
@@ -89,15 +97,13 @@ def loss_fn(model, xb, yb):
 def estimated_loss(model):
     out = {}
     model.eval()
-    # with mx.no_grad() is equivalent to torch.no_grad() context manager
-    with mx.stop_gradient():
-        for split in ["train", "val"]:
-            eval_losses = mx.zeros(n_eval_steps)
-            for k in range(n_eval_steps):
-                xb, yb = get_batch(split)
-                _, loss = model(xb, yb)
-                eval_losses[k] = loss.item()
-            out[split] = eval_losses.mean()
+    for split in ["train", "val"]:
+        eval_losses = mx.zeros(n_eval_steps)
+        for k in range(n_eval_steps):
+            xb, yb = get_batch(split)
+            _, loss = model(xb, yb)
+            eval_losses[k] = loss.item()
+        out[split] = eval_losses.mean()
     model.train()
     return out
 
@@ -106,7 +112,7 @@ m = Bigram(vocab_size=tokenizer.vocab_size)
 
 # initialize the generation
 init_tokens = mx.zeros((1, 1), dtype=mx.int32)
-tokens = m.generate(init_tokens, max_new_tokens=500)
+tokens = m.generate(init_tokens, max_new_tokens=max_new_tokens)
 print(tokenizer.decode(tokens[0].tolist()))
 
 
@@ -114,7 +120,7 @@ print(tokenizer.decode(tokens[0].tolist()))
 xb, yb = get_batch("train")
 
 # create optimizer
-optimizer = optimizers.AdamW(learning_rate=1e-3)
+optimizer = optimizers.AdamW(learning_rate=learning_rate)
 # loss and gradient function
 loss_and_grad = nn.value_and_grad(m, loss_fn)
 
@@ -136,12 +142,9 @@ for _ in range(n_train_steps):
         )
 
 
-# print(loss)
-
-# initialize the generation
 print("_______________________")
 init_tokens = mx.zeros((1, 1), dtype=mx.int32)
 
-tokens = m.generate(init_tokens, max_new_tokens=500)
+tokens = m.generate(init_tokens, max_new_tokens=max_new_tokens)
 
 print(tokenizer.decode(tokens[0].tolist()))
