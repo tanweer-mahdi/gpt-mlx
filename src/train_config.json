@@ -5,11 +5,12 @@
     },
     "model": {
         "context_window": 8,
+        "embedding_dim": 8,
         "batch_size": 32
     },
     "training": {
         "n_eval_steps": 200,
-        "n_train_steps": 10000,
+        "n_train_steps": 5000,
         "eval_interval": 500,
         "learning_rate": 0.001
     },

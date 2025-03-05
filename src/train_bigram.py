@@ -26,7 +26,8 @@ learning_rate = config["training"]["learning_rate"]
 max_new_tokens = config["generation"]["max_new_tokens"]
 
 tokenizer = CharTokenizer(text)
-
+vocab_size = tokenizer.vocab_size
+embedding_dim = config["model"]["embedding_dim"]
 data = mx.array(tokenizer.encode(text), dtype=mx.int32)
 train_data = data[:train_size]
 val_data = data[train_size:]
