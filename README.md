@@ -6,7 +6,7 @@ A PyTorch-style implementation of a decoder-only GPT model using Apple's MLX fra
 
 This project implements a decoder-only transformer architecture (GPT-style) using MLX, Apple's machine learning framework optimized for Apple Silicon. The implementation includes:
 
-- Character-level tokenization
+- Only Character-level tokenization
 - Multi-head self-attention
 - Position embeddings
 - Configurable model architecture
@@ -23,7 +23,6 @@ gpt-mlx/
 │   ├── train_gpt.py      # Main training script for GPT
 │   ├── train_bigram.py   # Bigram model implementation
 │   ├── train_config.json # Model and training configuration
-│   └── scratchpad.py     # Experimental code and testing
 ├── tests/                # Test suite
 └── setup.py             # Package setup file
 ```
