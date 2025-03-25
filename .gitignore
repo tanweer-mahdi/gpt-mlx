@@ -1,1 +1,4 @@
 src/scratchpad.py
+.pytest_cache
+.trunk
+.venv
